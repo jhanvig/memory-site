@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Memories{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(to bottom, {{ theme_color }}, #ffe9f0);
+        padding: 30px;
+        overflow-x: hidden;
+    }
+
+    h1 {
+        text-align: center;
+        color: #dd7fa4;
+        margin-bottom: 10px;
+    }
+
+    p.message {
+        text-align: center;
+        font-size: 18px;
+        color: #b56482;
+        margin-bottom: 40px;
+    }
+
+    .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 across */
+    gap: 35px;
+    width: 100%;
+    max-width: 900px;        /* keeps it centered and clean */
+    margin: 40px auto;
+    justify-items: center;
+    align-items: start;
+}
+
+
+    .polaroid {
+    background: white;
+    padding: 10px 10px 14px 10px;
+    width: 160px;                    /* 🌸 smaller cards = more visible */
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: 0.2s;
+}
+
+.polaroid:nth-child(odd) {
+    transform: rotate(-2deg);        /* scrapbook tilt */
+}
+.polaroid:nth-child(even) {
+    transform: rotate(2deg);
+}
+
+
+   .polaroid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;       /* fills frame and crops neatly */
+    border-radius: 10px;
+    display: block;
+}
+
+
+
+    .btn {
+        display: block;
+        width: 240px;
+        margin: auto;
+        padding: 14px;
+        text-align: center;
+        background: #f7b6cc;
+        color: white;
+        font-size: 17px;
+        border-radius: 12px;
+        text-decoration: none;
+        box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    .btn:hover {
+        background: #e89bb5;
+    }
+
+    .back-only {
+    position: fixed;
+    top: 18px;
+    left: 22px;
+    z-index: 9999;
+    background: white;
+    color: #7a4c74;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    transition: 0.15s;
+    cursor: pointer;
+}
+
+.back-only:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+
+    /* Floating Hearts */
+    .heart {
+        position: fixed;
+        bottom: -10px;
+        font-size: 20px;
+        animation: floatUp 6s linear infinite;
+        color: #f4a9c5;
+        opacity: 0.7;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); }
+        100% { transform: translateY(-120vh) scale(1.6); opacity: 0; }
+    }
+</style>
+<a class="back-only" href="{{ url_for('dashboard') }}">⬅ Back to Dashboard</a>
+<h1>{{ user.username }}'s memory page 💗</h1>
+
+<p class="message">{{ user.message }}</p>
+
+<!-- Image Gallery -->
+<div class="gallery">
+    {% for image in photos %}
+        <div class="polaroid">
+            <img src="{{ url_for('static', filename='images/' ~ image) }}">
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Floating Hearts -->
+<script>
+    function createHeart() {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.innerHTML = "💗";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = (5 + Math.random() * 3) + "s";
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 6000);
+    }
+
+    setInterval(createHeart, 700);
+</script>
+
+{% endblock %}

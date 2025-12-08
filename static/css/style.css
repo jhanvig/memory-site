@@ -1,0 +1,92 @@
+/* Pastel pink + cream + soft brown theme */
+body.bg-pastel {
+  background: #f9e9ec;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  color: #5c3d3d;
+}
+
+/* Center card */
+.center-card {
+  max-width: 350px;
+  margin: 120px auto;
+  padding: 30px;
+  background: #fff7f8;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px #e3c6cc;
+}
+
+/* Logo text */
+.logo {
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn {
+  background: #ffbfcf;
+  color: #5c3d3d;
+  padding: 10px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  display: inline-block;
+  margin: 6px 0;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #ff9db7;
+}
+
+/* Forms */
+.login-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #d8b4b8;
+}
+
+/* Polaroid gallery */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 30px;
+}
+
+.polaroid {
+  background: white;
+  padding: 10px;
+  border: 1px solid #deb7bf;
+  width: 180px;
+  transform: rotate(var(--r));
+  box-shadow: 0 4px 10px #e0b5c2;
+}
+
+.polaroid img {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.caption {
+  text-align: center;
+  color: #855f5f;
+  padding-top: 6px;
+}
+
+/* Soft navbar */
+.top-nav {
+  background: #ffccd8;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px #deb7bf;
+}

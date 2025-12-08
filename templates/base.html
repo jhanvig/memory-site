@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PawZen{% endblock %}</title>
+
+    <style>
+        /* UNIVERSAL LOGOUT BUTTON */
+        .logout-btn {
+            position: fixed;
+            top: 18px;
+            right: 22px;
+            background: white;
+            color: #7a4c74;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+            transition: 0.15s;
+            z-index: 1000; /* lowered so modals/toasts (z-index 2100/2200) appear above */
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    {% if session.get('user') %}
+        <a class="logout-btn" href="{{ url_for('logout') }}">logout (don't leave)🌷</a>
+    {% endif %}
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+<!-- EMOJI: stronger pointer-repel (paste once, replace previous emoji block) -->
+<style>
+  #floatField, .f-emoji, .f-note { box-sizing: border-box; }
+  #floatField { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+  .f-emoji {
+    position: absolute;
+    font-size: 30px;
+    width: 44px;
+    height: 44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events: auto;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.12s ease;
+    will-change: transform, left, top;
+    touch-action: none;
+  }
+  .f-emoji:active { cursor: grabbing; }
+  .f-note {
+    position: absolute;
+    background: #fff6fb;
+    padding: 8px 12px;
+    border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.12);
+    font-size: 0.95rem;
+    color: #6a3a67;
+    z-index: 10000;
+  }
+  .f-emoji.bounce {
+    animation: bounceScale .18s ease;
+  }
+  @keyframes bounceScale {
+    0% { transform: scale(1.12); }
+    60% { transform: scale(0.94); }
+    100% { transform: scale(1); }
+  }
+</style>
+
+<div id="floatField"></div>
+
+<script>
+(function(){
+  try {
+    // cleanup
+    document.querySelectorAll('.f-emoji, .f-note').forEach(n=>n.remove());
+    if(!document.getElementById('floatField')){
+      const fld = document.createElement('div'); fld.id = 'floatField'; document.body.appendChild(fld);
+    }
+    const field = document.getElementById('floatField');
+
+    // config
+    const EMOJIS = ["🐶","🐱","🐾","💌","🌸"];
+    const NOTES = [
+      "you’re doing amazing sweetie 💗",
+      "drink water pls 🐾",
+      "sending u warmth n love 🌸",
+      "take a tiny stretch break! 💞",
+      "you deserve peace today 🌿"
+    ];
+    const COUNT = 10;
+    const SPRITES = [];
+    let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+    let mouseLastX = mouseX, mouseLastY = mouseY, mouseLastT = Date.now();
+    let mouseVX = 0, mouseVY = 0;
+
+    // pointer tracking + velocity
+    document.addEventListener('mousemove', e => {
+      const now = Date.now();
+      const dt = Math.max(8, now - mouseLastT);
+      mouseVX = (e.clientX - mouseLastX) / dt * 16; // scaled to frame-ish units
+      mouseVY = (e.clientY - mouseLastY) / dt * 16;
+      mouseLastX = e.clientX; mouseLastY = e.clientY; mouseLastT = now;
+      mouseX = e.clientX; mouseY = e.clientY;
+    });
+    document.addEventListener('touchmove', e => {
+      if(e.touches && e.touches[0]) {
+        const t = e.touches[0];
+        const now = Date.now();
+        const dt = Math.max(8, now - mouseLastT);
+        mouseVX = (t.clientX - mouseLastX) / dt * 16;
+        mouseVY = (t.clientY - mouseLastY) / dt * 16;
+        mouseLastX = t.clientX; mouseLastY = t.clientY; mouseLastT = now;
+        mouseX = t.clientX; mouseY = t.clientY;
+      }
+    }, {passive:true});
+
+    // spawn sprites
+    for(let i=0;i<COUNT;i++){
+      const el = document.createElement('div');
+      el.className = 'f-emoji';
+      el.textContent = EMOJIS[Math.floor(Math.random()*EMOJIS.length)];
+      el.style.left = (Math.random()*window.innerWidth) + 'px';
+      el.style.top  = (Math.random()*window.innerHeight) + 'px';
+      el.style.fontSize = (18 + Math.floor(Math.random()*18)) + 'px';
+      field.appendChild(el);
+
+      const sprite = {
+        el,
+        x: parseFloat(el.style.left),
+        y: parseFloat(el.style.top),
+        vx: (Math.random()-0.5)*0.6,
+        vy: (Math.random()-0.5)*0.6,
+        paused: false,
+        pauseUntil: 0,
+        dragging: false,
+        dragOffsetX: 0,
+        dragOffsetY: 0,
+        lastPointerTime: 0,
+        lastPointerX: 0,
+        lastPointerY: 0,
+      };
+
+      // click = note (ignore if dragging)
+      el.addEventListener('click', (ev) => {
+        if(sprite.dragging) return;
+        sprite.paused = true; sprite.pauseUntil = Date.now() + 350;
+        showNote(sprite);
+      });
+
+      // hover pause
+      el.addEventListener('mouseenter', ()=> {
+        if(!sprite.dragging){ sprite.paused = true; sprite.vx = 0; sprite.vy = 0; el.style.transform = 'scale(1.06)'; }
+      });
+      el.addEventListener('mouseleave', ()=> {
+        if(!sprite.dragging){ sprite.paused = false; el.style.transform = ''; }
+      });
+
+      // drag handlers
+      el.addEventListener('pointerdown', (ev) => {
+        ev.preventDefault();
+        el.setPointerCapture && el.setPointerCapture(ev.pointerId);
+        sprite.dragging = true;
+        sprite.paused = true;
+        const rect = el.getBoundingClientRect();
+        sprite.dragOffsetX = ev.clientX - rect.left;
+        sprite.dragOffsetY = ev.clientY - rect.top;
+        sprite.lastPointerTime = Date.now();
+        sprite.lastPointerX = ev.clientX;
+        sprite.lastPointerY = ev.clientY;
+        el.style.transition = 'transform .06s ease';
+        el.style.transform = 'scale(1.14)';
+      });
+
+      el.addEventListener('pointermove', (ev) => {
+        if(!sprite.dragging) return;
+        sprite.x = ev.clientX - sprite.dragOffsetX;
+        sprite.y = ev.clientY - sprite.dragOffsetY;
+        el.style.left = sprite.x + 'px';
+        el.style.top  = sprite.y + 'px';
+        const now = Date.now();
+        const dt = Math.max(1, now - sprite.lastPointerTime);
+        sprite.vx = (ev.clientX - sprite.lastPointerX) / dt * 16;
+        sprite.vy = (ev.clientY - sprite.lastPointerY) / dt * 16;
+        sprite.lastPointerTime = now;
+        sprite.lastPointerX = ev.clientX;
+        sprite.lastPointerY = ev.clientY;
+      });
+
+      el.addEventListener('pointerup', (ev) => {
+        if(!sprite.dragging) return;
+        sprite.dragging = false;
+        try { el.releasePointerCapture && el.releasePointerCapture(ev.pointerId); } catch(e){}
+        sprite.pauseUntil = Date.now() + 120;
+        sprite.paused = false;
+        sprite.vx *= 1.6; sprite.vy *= 1.6; // bouncier on release
+        el.classList.add('bounce');
+        setTimeout(()=> el.classList.remove('bounce'), 220);
+        el.style.transition = ''; el.style.transform = '';
+      });
+
+      el.addEventListener('touchstart', ()=> { sprite.paused = true; sprite.pauseUntil = Date.now() + 300; }, {passive:true});
+
+      SPRITES.push(sprite);
+    }
+
+    // show note helper
+    function showNote(sprite){
+      const prev = document.querySelector('.f-note');
+      if(prev) prev.remove();
+      const note = document.createElement('div');
+      note.className = 'f-note';
+      note.innerHTML = '<button aria-label="close" style="float:right;border:none;background:transparent;font-weight:700;cursor:pointer;color:#9b5b92">&times;</button>' + NOTES[Math.floor(Math.random()*NOTES.length)];
+      document.body.appendChild(note);
+      const rect = sprite.el.getBoundingClientRect();
+      const left = Math.min(Math.max(rect.left, 8), window.innerWidth - 220);
+      let top = rect.top - 46;
+      if(top < 8) top = rect.bottom + 10;
+      note.style.left = left + 'px';
+      note.style.top = top + 'px';
+      note.querySelector('button').onclick = ()=> note.remove();
+      setTimeout(()=> { if(note.parentNode) note.remove(); }, 4200);
+    }
+
+    // animation loop with pointer-speed-aware repulsion
+    function tick(){
+      const now = Date.now();
+      for(const s of SPRITES){
+        if(s.paused && s.pauseUntil && now > s.pauseUntil){ s.paused = false; s.pauseUntil = 0; }
+
+        if(!s.dragging){
+          const dx = s.x - mouseX;
+          const dy = s.y - mouseY;
+          const dist = Math.hypot(dx, dy);
+
+          // base radius small for clickability
+          const BASE_RADIUS = 38;
+          // if pointer is moving fast, temporarily increase effective radius
+          const pointerSpeed = Math.hypot(mouseVX, mouseVY); // higher if swiping quickly
+          const extraRadius = Math.min(80, pointerSpeed * 6); // cap extra radius
+          const RADIUS = BASE_RADIUS + extraRadius;
+
+          if(!s.paused && dist < RADIUS){
+            // base force
+            let force = (RADIUS - dist) / RADIUS * 2.6; // slightly larger for snappier feel
+            // amplify if pointer is moving toward the sprite (dot product positive)
+            const toPointerX = (mouseX - s.x), toPointerY = (mouseY - s.y);
+            const dot = (mouseVX * toPointerX + mouseVY * toPointerY);
+            if(dot > 0){ // pointer moving toward sprite
+              force *= 1 + Math.min(1.6, pointerSpeed * 0.28); // amplify with pointer speed
+            }
+            // normalize direction away from pointer
+            const nx = dist === 0 ? (Math.random()-0.5) : (dx / dist);
+            const ny = dist === 0 ? (Math.random()-0.5) : (dy / dist);
+            s.vx += nx * force;
+            s.vy += ny * force;
+            // quick visual pop
+            s.el.classList.add('bounce');
+            setTimeout(()=> s.el.classList.remove('bounce'), 180);
+          }
+        }
+
+        // less damping for snappier bounces
+        s.vx *= 0.92;
+        s.vy *= 0.92;
+
+        if(!s.paused && !s.dragging){
+          s.x += s.vx;
+          s.y += s.vy;
+        }
+
+        // toroidal wrap
+        const margin = 60;
+        if(s.x < -margin) s.x = window.innerWidth + margin;
+        if(s.x > window.innerWidth + margin) s.x = -margin;
+        if(s.y < -margin) s.y = window.innerHeight + margin;
+        if(s.y > window.innerHeight + margin) s.y = -margin;
+
+        s.el.style.left = s.x + 'px';
+        s.el.style.top = s.y + 'px';
+      }
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    window.addEventListener('resize', ()=>{});
+
+    console.info('[emoji-upgrade] pointer-aware repulsion enabled');
+  } catch(err){
+    console.error('[emoji-upgrade] error:', err);
+  }
+})();
+</script>
+
+</body>
+</html>

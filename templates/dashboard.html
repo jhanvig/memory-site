@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(180deg, {{ theme_color }} 0%, #ffeaff 80%, #fff6ff 90%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    h1 {
+        margin-top: 70px;
+        font-size: 2.3rem;
+        font-weight: 600;
+        color: #5a3a5c;
+    }
+
+    .spotify-container {
+        margin-top: 22px;
+        background: white;
+        padding: 16px 22px;
+        width: 330px;
+        border-radius: 25px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+        display: flex;
+        justify-content: center;
+    }
+
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+        gap: 16px;
+    }
+
+    .dash-btn {
+        background: #ffffff;
+        color: #444;
+        padding: 15px 40px;
+        font-size: 1.05rem;
+        border-radius: 999px;
+        width: 260px;
+        text-align: center;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        transition: 0.18s;
+        cursor: pointer;
+        display: block;
+    }
+
+    .dash-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+    }
+
+    .note-card {
+        margin-top: 40px;
+        background: #ffffff;
+        padding: 18px 26px;
+        width: 340px;
+        border-radius: 22px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        font-size: 0.98rem;
+        color: #6d4a6f;
+        line-height: 1.5;
+        text-align: center;
+    }
+</style>
+
+<h1>~   hewoooo, {{ username }} <3  ~ </h1>
+
+<!-- Spotify Widget -->
+<div class="spotify-container">
+    <iframe 
+        style="border-radius:15px"
+        src="https://open.spotify.com/embed/playlist/{{ playlist_id }}?utm_source=generator&theme=1"
+        width="290" 
+        height="80"
+        frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+    </iframe>
+</div>
+
+<!-- Buttons -->
+<div class="button-container">
+    <a class="dash-btn" href="{{ url_for('memories', username=session['user']) }}">memories ✨</a>
+    <a class="dash-btn" href={{ drive_link }} target="_blank">drive 📁</a>
+</div>
+
+<!-- Personalized Note -->
+<div class="note-card">
+    {{ note }}
+    <div class="emoji-tip">
+        (you can drag and click on the emojis, they're yours to mess around with!)
+    </div>
+</div>
+
+
+{% endblock %}

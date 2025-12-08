@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #fde7ef, #fff3f7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            width: 330px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #d688a8;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            border: 2px solid #f4c9d8;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        button {
+            background: #f7b6cc;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            color: white;
+        }
+
+        button:hover {
+            background: #e89bb5;
+        }
+
+        .error {
+            color: #e46c85;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="card">
+    <h2>hiiiiiiii losers 💗</h2>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="text" name="username" placeholder="Username" required><br>
+        <input type="password" name="password" placeholder="Password" required><br>
+        <button>Login</button>
+    </form>
+</div>
+
+</body>
+</html>
