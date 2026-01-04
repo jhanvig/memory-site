@@ -6,7 +6,8 @@ import os
 app = Flask(__name__)
 app.secret_key = "change-this-later"
 
-DB_PATH = "database.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "database.db")
 
 
 def get_db():
